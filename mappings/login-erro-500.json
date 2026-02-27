@@ -1,0 +1,19 @@
+{
+  "priority": 5,
+  "request": {
+    "method": "POST",
+    "urlPattern": "/login/",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$[?(@.username && @.password)]"
+      }
+    ]
+  },
+  "response": {
+    "status": 500,
+    "jsonBody": {
+      "erro": true,
+      "mensagem": "Erro interno ao processar login"
+    }
+  }
+}

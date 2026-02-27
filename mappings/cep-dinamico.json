@@ -1,0 +1,12 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "GET",
+    "urlPattern": "/ws/(58042019|65243109|78936120)/json/"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "cep-{{request.pathSegments.[1]}}.json",
+    "transformers": ["response-template"]
+  }
+}

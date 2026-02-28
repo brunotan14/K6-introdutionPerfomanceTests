@@ -14,11 +14,6 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Setup k6
-        uses: grafana/setup-k6@v1
-        with:
-          version: latest
-
       - name: Subir WireMock (API mock)
         run: |
           docker run -d --name wiremock -p 8080:8080 \
@@ -40,10 +35,10 @@ jobs:
           docker logs wiremock || true
           exit 1
 
-      - name: Rodar testes k6
+      - name: Rodar testes k6 (Docker)
         run: |
-          k6 run tests/test-loginsucesso.js
-          k6 run tests/test-login500.js
-          k6 run tests/test-cep500.js
-          k6 run tests/test-cepsucess.js
+          docker run --rm --network=host -v "${{ github.workspace }}:/scripts" grafana/k6 run /scripts/tests/test-loginsucesso.js
+          docker run --rm --network=host -v "${{ github.workspace }}:/scripts" grafana/k6 run /scripts/tests/test-login500.js
+          docker run --rm --network=host -v "${{ github.workspace }}:/scripts" grafana/k6 run /scripts/tests/test-cep500.js
+          docker run --rm --network=host -v "${{ github.workspace }}:/scripts" grafana/k6 run /scripts/tests/test-cepsucess.js
 

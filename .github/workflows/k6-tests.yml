@@ -1,0 +1,53 @@
+name: k6 tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  run-k6-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Instalar k6
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnupg ca-certificates
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Subir WireMock (API mock)
+        run: |
+          docker run -d --name wiremock -p 8080:8080 \
+            -v "${{ github.workspace }}/mappings:/home/wiremock/mappings" \
+            -v "${{ github.workspace }}/__files:/home/wiremock/__files" \
+            wiremock/wiremock
+
+      - name: Aguardar WireMock ficar pronto
+        run: |
+          for i in {1..30}; do
+            if curl -sSf http://localhost:8080/ws/58042019/json/ > /dev/null; then
+              echo "WireMock está no ar."
+              exit 0
+            fi
+            echo "Aguardando WireMock subir..."
+            sleep 2
+          done
+          echo "WireMock não subiu a tempo."
+          docker logs wiremock || true
+          exit 1
+
+      - name: Rodar testes k6
+        run: |
+          k6 run tests/test-loginsucesso.js
+          k6 run tests/test-login500.js
+          k6 run tests/test-cep500.js
+          k6 run tests/test-cepsucess.js
+

@@ -4,7 +4,8 @@ import { check, sleep } from 'k6'
 export default function () {
    const url = "http://localhost:8080/login/" // url da api mockada
 
-   const payload = JSON.stringify({ username: 'username', password: 'password' }) //payload da requisicao, oq vai ser enviado para a api
+   //payload da requisicao, oq vai ser enviado para a api, o uso do stringify converte os valores para string
+   const payload = JSON.stringify({ username: 'username', password: 'password' }) 
 
    const params = { //parametros da requisicao, oq vai ser enviado para a api, nao é necessario ter todos os parametros, apenas o Content-Type
     headers: {
